@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pipeline-${PIPELINE_ID}
+  labels:
+    app: streamflow-pipeline
+    pipelineId: "${PIPELINE_ID}"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: streamflow-pipeline
+      pipelineId: "${PIPELINE_ID}"
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: streamflow-pipeline
+        pipelineId: "${PIPELINE_ID}"
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: pipeline
+          image: ${IMAGE}
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PIPELINE_ID
+              value: "${PIPELINE_ID}"
+            - name: COUCHBASE_CONNECTION_STRING
+              value: "${COUCHBASE_CONNECTION_STRING}"
+            - name: COUCHBASE_USERNAME
+              value: "${COUCHBASE_USERNAME}"
+            - name: COUCHBASE_PASSWORD
+              # TODO production: chuyen sang Secret (secretKeyRef) thay vi plain value - de plain
+              # o day cho don gian luc con o giai doan dev/demo.
+              value: "${COUCHBASE_PASSWORD}"
+            - name: COUCHBASE_BUCKET
+              value: "${COUCHBASE_BUCKET}"
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"

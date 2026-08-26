@@ -1,0 +1,93 @@
+# Activation API (Giai doan 2 - xem docs/PipelineControlPlane/plan.md): 1 service singleton, khong
+# templated theo pipelineId (khac pipeline-deployment.template.yaml). Sua truc tiep "image:" ben
+# duoi truoc khi apply (vd sau khi `minikube image load` hoac push len registry that).
+#
+# RBAC: get/list/patch/update/create/delete tren Deployment trong 1 namespace. "create" duoc them o ban
+# mo rong Giai doan 2: Activation API TU TAO Deployment cho pipeline moi (khong con phai tu tay kubectl
+# apply) - xem PipelineDeploymentManager.ensureDeployed(). "delete" them o Giai doan 4: DELETE
+# /pipelines/{id} tu xoa Deployment qua PipelineDeploymentManager.undeploy() - CHI xoa Deployment, khong
+# dong toi internal topic/consumer group/state store Kafka (van la thao tac thu cong rieng).
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: streamflow-activation-api
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: streamflow-activation-api-deployment-manager
+rules:
+  - apiGroups: [ "apps" ]
+    resources: [ "deployments" ]
+    verbs: [ "get", "list", "patch", "update", "create", "delete" ]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: streamflow-activation-api-deployment-manager
+subjects:
+  - kind: ServiceAccount
+    name: streamflow-activation-api
+roleRef:
+  kind: Role
+  name: streamflow-activation-api-deployment-manager
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: streamflow-activation-api
+  labels:
+    app: streamflow-activation-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: streamflow-activation-api
+  template:
+    metadata:
+      labels:
+        app: streamflow-activation-api
+    spec:
+      serviceAccountName: streamflow-activation-api
+      containers:
+        - name: activation-api
+          image: streamflow/activation-api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 7100
+          env:
+            - name: API_PORT
+              value: "7100"
+            - name: COUCHBASE_CONNECTION_STRING
+              value: "couchbase://couchbase"
+            - name: COUCHBASE_USERNAME
+              value: "Administrator"
+            - name: COUCHBASE_PASSWORD
+              # TODO production: chuyen sang Secret (secretKeyRef), giong nhu da ghi chu o
+              # pipeline-deployment.template.yaml.
+              value: "password"
+            - name: COUCHBASE_BUCKET
+              value: "streamflow"
+            - name: K8S_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: streamflow-activation-api
+spec:
+  selector:
+    app: streamflow-activation-api
+  ports:
+    - port: 80
+      targetPort: 7100

@@ -1,0 +1,62 @@
+{
+  "pipelineId": "customer-orders-demo-local",
+  "bootstrapServers": "broker:9092",
+  "applicationId": "customer-orders-demo-app-local",
+  "nodes": [
+    {
+      "id": "srcLeft",
+      "type": "SOURCE",
+      "topic": "customers"
+    },
+    {
+      "id": "joinCustomerOrder",
+      "type": "TABLE_JOIN",
+      "leftStream": "srcLeft",
+      "rightStream": "srcRight",
+      "leftStreamName": "customer",
+      "rightStreamName": "order",
+      "selectKey": "value.path('customerId')",
+      "joinType": "INNER"
+    },
+    {
+      "id": "sinkJoined",
+      "type": "SINK",
+      "input": "joinCustomerOrder",
+      "topic": "customer-orders-joined"
+    },
+    {
+      "id": "srcRight",
+      "type": "SOURCE",
+      "topic": "orders"
+    },
+    {
+      "id": "aggOrderStats",
+      "type": "AGGREGATE",
+      "input": "srcRight",
+      "groupMode": "GROUP_BY",
+      "keyExtractor": "value.path('customerId')",
+      "aggregations": [
+        {
+          "type": "COUNT",
+          "alias": "orderCount"
+        },
+        {
+          "type": "SUM",
+          "sourceField": "amount",
+          "alias": "totalAmount"
+        }
+      ],
+      "window": {
+        "type": "TUMBLING",
+        "sizeMs": 60000,
+        "graceMs": 5000
+      }
+    },
+    {
+      "id": "sinkOrderStats",
+      "type": "SINK",
+      "input": "aggOrderStats",
+      "topic": "customer-order-stats"
+    }
+  ]
+}

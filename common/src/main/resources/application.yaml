@@ -1,0 +1,21 @@
+COUCHBASE_CONNECTION_STRING: couchbase://localhost
+COUCHBASE_USERNAME: Administrator
+COUCHBASE_PASSWORD: password
+COUCHBASE_BUCKET: streamflow
+COUCHBASE_SCOPE: _default
+COUCHBASE_COLLECTION: _default
+
+REDIS_HOST: localhost
+REDIS_PORT: "6379"
+
+JDBC_URL: jdbc:postgresql://localhost:5432/streamflow
+JDBC_USERNAME: streamflow
+JDBC_PASSWORD: streamflow
+
+K8S_NAMESPACE: default
+
+PIPELINE_IMAGE: streamflow/pipeline-control-plane:1.0
+
+PIPELINE_COUCHBASE_CONNECTION_STRING: couchbase://couchbase
+
+API_PORT: "7100"

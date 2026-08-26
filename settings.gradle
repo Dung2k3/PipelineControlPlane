@@ -1,0 +1,5 @@
+rootProject.name = 'pipeline-control-plane'
+
+include 'common'
+include 'api'
+include 'runner'

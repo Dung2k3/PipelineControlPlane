@@ -1,0 +1,36 @@
+plugins {
+    id 'java-library'
+}
+
+ext {
+    kafkaVersion = '3.7.0'
+    jacksonVersion = '2.17.1'
+    slf4jVersion = '2.0.13'
+    couchbaseVersion = '3.7.1'
+}
+
+dependencies {
+    // Engine (config/node/validation/topology/expression/serdes) + doc config Couchbase dung chung
+    // cho ca api va runner. Khong ai o day duoc lo ra qua chu ky public method ma api/runner goi
+    // truc tiep, nen khai implementation la du (api/runner van thay duoc luc runtime qua project
+    // dependency, chi khong thay luc compile - dung y).
+    implementation "org.apache.kafka:kafka-streams:${kafkaVersion}"
+    implementation "org.apache.kafka:kafka-clients:${kafkaVersion}"
+    implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${jacksonVersion}"
+    implementation "org.springframework:spring-expression:6.1.13"
+    implementation 'jakarta.validation:jakarta.validation-api:3.1.1'
+    implementation 'org.hibernate.validator:hibernate-validator:8.0.1.Final'
+    implementation 'org.glassfish:jakarta.el:4.0.2'
+    implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+    runtimeOnly "org.slf4j:slf4j-simple:${slf4jVersion}"
+    implementation 'com.zaxxer:HikariCP:5.1.0'
+    implementation 'org.postgresql:postgresql:42.7.3'
+    implementation 'redis.clients:jedis:5.1.5'
+    implementation "com.couchbase.client:java-client:${couchbaseVersion}"
+
+    testImplementation "org.apache.kafka:kafka-streams-test-utils:${kafkaVersion}"
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}

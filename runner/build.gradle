@@ -1,0 +1,32 @@
+plugins {
+    id 'application'
+}
+
+ext {
+    kafkaVersion = '3.7.0'
+    slf4jVersion = '2.0.13'
+}
+
+application {
+    mainClass = 'com.streamflow.controlplane.Main'
+}
+
+dependencies {
+    implementation project(':common')
+
+    // Main.java tu import StreamsConfig/Topology truc tiep -> can khai o day de compile (common
+    // co san kafka-streams luc runtime qua project dependency, nhung khong lo ra compile classpath).
+    implementation "org.apache.kafka:kafka-streams:${kafkaVersion}"
+    // KafkaStreamsRunner tu import org.slf4j.Logger truc tiep - cung ly do nhu tren.
+    implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.register('Main', JavaExec) {
+    group = 'application'
+    description = "Runs ${'com.streamflow.controlplane.Main'} (doc PIPELINE_ID tu Couchbase)"
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.streamflow.controlplane.Main'
+}
