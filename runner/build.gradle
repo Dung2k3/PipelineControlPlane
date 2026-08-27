@@ -30,3 +30,11 @@ tasks.register('Main', JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'com.streamflow.controlplane.Main'
 }
+
+tasks.register('MultiPipelineMain', JavaExec) {
+    group = 'application'
+    description = "Runs ${'com.streamflow.controlplane.MultiPipelineMain'} (demo Model B - nhieu " +
+            "pipeline chung 1 JVM, doc PIPELINE_IDS - phan cach bang dau phay - tu Couchbase)"
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.streamflow.controlplane.MultiPipelineMain'
+}

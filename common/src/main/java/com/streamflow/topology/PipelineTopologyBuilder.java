@@ -27,6 +27,7 @@ import com.streamflow.node.source.SourceNodeBuilder;
 import com.streamflow.node.source.SourceNodeConfig;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
+import org.apache.kafka.streams.processor.internals.namedtopology.KafkaStreamsNamedTopologyWrapper;
 
 import java.util.ArrayList;
 import java.util.List;

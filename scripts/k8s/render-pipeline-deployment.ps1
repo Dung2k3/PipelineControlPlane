@@ -1,15 +1,3 @@
-# Render 1 k8s Deployment YAML cho dung 1 pipelineId tu
-# api/src/main/resources/k8s/pipeline-deployment.template.yaml - CUNG 1 file nguon
-# ma PipelineDeploymentManager (Activation API) doc luc tu tao Deployment (xem
-# docs/plan.md), khong phai ban rieng. Chi dung script nay khi Activation API
-# chua chay duoc (fallback thu cong) - duong chinh la goi POST /pipelines/{id}/activate.
-#
-# Dung:
-#   scripts/k8s/render-pipeline-deployment.ps1 -PipelineId customer-orders-demo > deploy.yaml
-#   scripts/k8s/render-pipeline-deployment.ps1 -PipelineId customer-orders-demo -NodeSelector worker=worker-a | kubectl apply -f -
-#
-# Doi IMAGE/COUCHBASE_* qua bien moi truong truoc khi goi script neu khac gia tri mac dinh. Khong co
-# BOOTSTRAP_SERVERS o day co y - pod tu dung gia tri da luu san trong PipelineConfig (Couchbase).
 param(
     [Parameter(Mandatory = $true)][string]$PipelineId,
     [string]$NodeSelector = ""

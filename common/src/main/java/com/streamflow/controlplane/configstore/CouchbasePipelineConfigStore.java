@@ -13,6 +13,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.streamflow.config.PipelineConfig;
 import com.streamflow.controlplane.couchbase.CouchbaseConnection;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CouchbasePipelineConfigStore {
@@ -50,26 +51,25 @@ public class CouchbasePipelineConfigStore {
         return parseConfig(mapper, json, pipelineId);
     }
 
-    public long bumpVersion(String pipelineId) {
-        String docId = DOC_PREFIX + pipelineId;
-        String statement = "UPDATE `" + bucketName + "` USE KEYS $docId "
-                + "SET version = IFMISSINGORNULL(version, 0) + 1 "
-                + "RETURNING version";
+    public List<PipelineConfig> listAll() {
+        String statement = "SELECT META(p).id AS docId, p.* FROM `" + bucketName + "` AS p "
+                + "WHERE META(p).id LIKE $prefix";
         QueryResult result;
         try {
-            result = cluster.query(statement,
-                    QueryOptions.queryOptions().parameters(JsonObject.create().put("docId", docId)));
+            result = cluster.query(statement, QueryOptions.queryOptions()
+                    .parameters(JsonObject.create().put("prefix", DOC_PREFIX + "%")));
         } catch (RuntimeException e) {
-            throw new PipelineConfigLoadException(
-                    pipelineId, "Loi tang version pipeline config tren Couchbase cho pipelineId=" + pipelineId, e);
+            throw new PipelineConfigLoadException(null, "Loi liet ke pipeline config tu Couchbase", e);
         }
-        List<JsonObject> rows = result.rowsAsObject();
-        if (rows.isEmpty()) {
-            throw new PipelineConfigLoadException(
-                    pipelineId,
-                    "Khong tim thay pipeline config trong Couchbase cho pipelineId=" + pipelineId, null);
+
+        List<PipelineConfig> configs = new ArrayList<>();
+        for (JsonObject row : result.rowsAsObject()) {
+            String docId = row.getString("docId");
+            row.removeKey("docId");
+            String pipelineId = docId.substring(DOC_PREFIX.length());
+            configs.add(parseConfig(mapper, row.toString(), pipelineId));
         }
-        return rows.get(0).getLong("version");
+        return configs;
     }
 
     static PipelineConfig parseConfig(ObjectMapper mapper, String json, String pipelineId) {
@@ -88,8 +88,6 @@ public class CouchbasePipelineConfigStore {
     private static ObjectMapper buildMapper() {
         return new ObjectMapper()
                 .registerModule(new JavaTimeModule())
-                // Doc Couchbase co the tich luy field van hanh (createdAt, updatedBy...) khong co
-                // trong PipelineConfig - khong de nhung field do lam load that bai.
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 }

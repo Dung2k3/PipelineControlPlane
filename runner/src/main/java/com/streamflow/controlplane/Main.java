@@ -33,7 +33,22 @@ public class Main {
         Properties props = new Properties();
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, config.getApplicationId());
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, config.getBootstrapServers());
+        applyTuning(props, config);
 
         KafkaStreamsRunner.run(topology, props);
+    }
+
+    // Field null (mac dinh) -> khong put property tuong ung, de Kafka Streams tu dung default cua
+    // no thay vi minh tu bia 1 gia tri "mac dinh" khac o day.
+    private static void applyTuning(Properties props, PipelineConfig config) {
+        if (config.getNumStreamThreads() != null) {
+            props.put(StreamsConfig.NUM_STREAM_THREADS_CONFIG, config.getNumStreamThreads());
+        }
+        if (config.getStatestoreCacheMaxBytes() != null) {
+            props.put(StreamsConfig.STATESTORE_CACHE_MAX_BYTES_CONFIG, config.getStatestoreCacheMaxBytes());
+        }
+        if (config.getCommitIntervalMs() != null) {
+            props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, config.getCommitIntervalMs());
+        }
     }
 }

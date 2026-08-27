@@ -40,10 +40,15 @@ spec:
               value: "${COUCHBASE_PASSWORD}"
             - name: COUCHBASE_BUCKET
               value: "${COUCHBASE_BUCKET}"
+            - name: JAVA_TOOL_OPTIONS
+              # Heap theo % memory limit that cua container (thay vi JVM tu doan theo default 25%
+              # khi khong co flag nao), tranh vua OOMKilled (heap qua cao) vua phi resource (heap qua
+              # thap so voi limit da xin).
+              value: "-XX:MaxRAMPercentage=75.0"
           resources:
             requests:
-              cpu: "250m"
-              memory: "512Mi"
+              cpu: "${CPU_REQUEST}"
+              memory: "${MEMORY_REQUEST}"
             limits:
-              cpu: "1"
-              memory: "1Gi"
+              cpu: "${CPU_LIMIT}"
+              memory: "${MEMORY_LIMIT}"

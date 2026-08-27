@@ -40,6 +40,40 @@ class PipelineDeploymentManagerTest {
     }
 
     @Test
+    void createsWithDefaultResourcesWhenNotConfigured() {
+        PipelineDeploymentManager manager = new PipelineDeploymentManager(client, "default");
+        PipelineConfig config = new PipelineConfig("orders", "broker:29092", "orders-app", java.util.List.of());
+
+        manager.ensureDeployed("orders", config);
+
+        var resources = deployment(client, "orders").getSpec().getTemplate().getSpec()
+                .getContainers().get(0).getResources();
+        assertEquals("250m", resources.getRequests().get("cpu").toString());
+        assertEquals("512Mi", resources.getRequests().get("memory").toString());
+        assertEquals("1", resources.getLimits().get("cpu").toString());
+        assertEquals("1Gi", resources.getLimits().get("memory").toString());
+    }
+
+    @Test
+    void createsWithCustomResourcesWhenConfigured() {
+        PipelineDeploymentManager manager = new PipelineDeploymentManager(client, "default");
+        PipelineConfig config = new PipelineConfig("heavy-join", "broker:29092", "heavy-join-app", java.util.List.of());
+        config.setCpuRequest("500m");
+        config.setCpuLimit("2");
+        config.setMemoryRequest("1Gi");
+        config.setMemoryLimit("2Gi");
+
+        manager.ensureDeployed("heavy-join", config);
+
+        var resources = deployment(client, "heavy-join").getSpec().getTemplate().getSpec()
+                .getContainers().get(0).getResources();
+        assertEquals("500m", resources.getRequests().get("cpu").toString());
+        assertEquals("1Gi", resources.getRequests().get("memory").toString());
+        assertEquals("2", resources.getLimits().get("cpu").toString());
+        assertEquals("2Gi", resources.getLimits().get("memory").toString());
+    }
+
+    @Test
     void createsWithoutNodeSelectorWhenNotConfigured() {
         PipelineDeploymentManager manager = new PipelineDeploymentManager(client, "default");
         PipelineConfig config = new PipelineConfig("payments", "broker:29092", "payments-app", java.util.List.of());
@@ -104,6 +138,10 @@ class PipelineDeploymentManagerTest {
         boolean deleted = manager.undeploy("ghost");
 
         assertFalse(deleted);
+    }
+
+    private static Deployment deployment(KubernetesClient client, String pipelineId) {
+        return client.apps().deployments().inNamespace("default").withName("pipeline-" + pipelineId).get();
     }
 
     private static String envValue(Deployment deployment, String name) {

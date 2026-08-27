@@ -14,7 +14,7 @@ JDBC_PASSWORD: streamflow
 
 K8S_NAMESPACE: default
 
-PIPELINE_IMAGE: streamflow/pipeline-control-plane:1.0
+PIPELINE_IMAGE: streamflow/pipeline-control-plane:1.1
 
 PIPELINE_COUCHBASE_CONNECTION_STRING: couchbase://couchbase
 

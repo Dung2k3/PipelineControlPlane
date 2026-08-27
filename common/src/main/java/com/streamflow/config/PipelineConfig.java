@@ -31,6 +31,29 @@ public class PipelineConfig {
 
     private String nodeSelectorValue;
 
+    // Resource hint cho container cua pod (k8s quantity format, vd "250m", "512Mi"). Null (mac dinh)
+    // = PipelineDeploymentManager tu fallback ve gia tri mac dinh chung, dung cho pipeline nao chua
+    // can tune rieng. Cho phep pipeline nang (nhieu Join/Aggregate/JDBC enrich) xin nhieu resource
+    // hon pipeline nhe (Filter/Mapping don gian) thay vi ca 2 dung chung 1 muc cung.
+    private String cpuRequest;
+
+    private String cpuLimit;
+
+    private String memoryRequest;
+
+    private String memoryLimit;
+
+    // Kafka Streams tuning hint - null (mac dinh) = khong set property tuong ung, de Kafka Streams
+    // tu dung default cua no. Pipeline nhieu Join/Aggregate (RocksDB state store nang) can cache lon
+    // hon va it commit hon; pipeline chi Filter/Mapping don gian khong can chinh gi. numStreamThreads
+    // nen <= so CPU limit da xin trong cpuLimit o tren, khong tu suy ra o day de tranh 2 field ngam
+    // rang buoc nhau kho hieu.
+    private Integer numStreamThreads;
+
+    private Long statestoreCacheMaxBytes;
+
+    private Long commitIntervalMs;
+
     public PipelineConfig(String pipelineId, String bootstrapServers, String applicationId, List<NodeConfig> nodes) {
         this.pipelineId = pipelineId;
         this.bootstrapServers = bootstrapServers;
@@ -103,5 +126,61 @@ public class PipelineConfig {
 
     public void setNodeSelectorValue(String nodeSelectorValue) {
         this.nodeSelectorValue = nodeSelectorValue;
+    }
+
+    public String getCpuRequest() {
+        return cpuRequest;
+    }
+
+    public void setCpuRequest(String cpuRequest) {
+        this.cpuRequest = cpuRequest;
+    }
+
+    public String getCpuLimit() {
+        return cpuLimit;
+    }
+
+    public void setCpuLimit(String cpuLimit) {
+        this.cpuLimit = cpuLimit;
+    }
+
+    public String getMemoryRequest() {
+        return memoryRequest;
+    }
+
+    public void setMemoryRequest(String memoryRequest) {
+        this.memoryRequest = memoryRequest;
+    }
+
+    public String getMemoryLimit() {
+        return memoryLimit;
+    }
+
+    public void setMemoryLimit(String memoryLimit) {
+        this.memoryLimit = memoryLimit;
+    }
+
+    public Integer getNumStreamThreads() {
+        return numStreamThreads;
+    }
+
+    public void setNumStreamThreads(Integer numStreamThreads) {
+        this.numStreamThreads = numStreamThreads;
+    }
+
+    public Long getStatestoreCacheMaxBytes() {
+        return statestoreCacheMaxBytes;
+    }
+
+    public void setStatestoreCacheMaxBytes(Long statestoreCacheMaxBytes) {
+        this.statestoreCacheMaxBytes = statestoreCacheMaxBytes;
+    }
+
+    public Long getCommitIntervalMs() {
+        return commitIntervalMs;
+    }
+
+    public void setCommitIntervalMs(Long commitIntervalMs) {
+        this.commitIntervalMs = commitIntervalMs;
     }
 }

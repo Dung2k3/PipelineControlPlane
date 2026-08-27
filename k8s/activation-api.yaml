@@ -1,12 +1,3 @@
-# Activation API (Giai doan 2 - xem docs/PipelineControlPlane/plan.md): 1 service singleton, khong
-# templated theo pipelineId (khac pipeline-deployment.template.yaml). Sua truc tiep "image:" ben
-# duoi truoc khi apply (vd sau khi `minikube image load` hoac push len registry that).
-#
-# RBAC: get/list/patch/update/create/delete tren Deployment trong 1 namespace. "create" duoc them o ban
-# mo rong Giai doan 2: Activation API TU TAO Deployment cho pipeline moi (khong con phai tu tay kubectl
-# apply) - xem PipelineDeploymentManager.ensureDeployed(). "delete" them o Giai doan 4: DELETE
-# /pipelines/{id} tu xoa Deployment qua PipelineDeploymentManager.undeploy() - CHI xoa Deployment, khong
-# dong toi internal topic/consumer group/state store Kafka (van la thao tac thu cong rieng).
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -64,16 +55,9 @@ spec:
             - name: COUCHBASE_USERNAME
               value: "Administrator"
             - name: COUCHBASE_PASSWORD
-              # TODO production: chuyen sang Secret (secretKeyRef), giong nhu da ghi chu o
-              # pipeline-deployment.template.yaml.
               value: "password"
             - name: COUCHBASE_BUCKET
               value: "streamflow"
-            # Dung de template hoa pipeline-deployment.template.yaml (PipelineDeploymentManager.create).
-            # couchbase/broker o day la container Docker ngoai cluster (xem docker-compose.yml o root
-            # repo), KHONG phai Service trong k8s. minikube phai duoc
-            # `docker network connect pipelinecontrolplane_default minikube` truoc thi Pod moi
-            # resolve duoc 2 ten nay.
             - name: PIPELINE_COUCHBASE_CONNECTION_STRING
               value: "couchbase://couchbase"
             - name: PIPELINE_IMAGE

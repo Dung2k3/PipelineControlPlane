@@ -17,9 +17,37 @@ COPY runner ./runner
 RUN chmod +x gradlew \
     && ./gradlew --no-daemon :runner:installDist
 
-FROM eclipse-temurin:17-jre AS runtime
-WORKDIR /app
+# jlink: dung jdeps quet toan bo jar (app + moi thu vien - Kafka Streams, RocksDB JNI, Couchbase SDK,
+# Jackson...) de biet CHINH XAC module JDK nao dang thuc su dung, roi chi link tung ay module thay vi
+# ca bo JRE day du (eclipse-temurin:17-jre ~430MB dung het moi module ke ca java.desktop/java.rmi/...
+# ma pipeline khong bao gio dung toi). --ignore-missing-deps vi vai lib (Netty, native optional
+# codec...) reference class o runtime qua reflection ma jdeps khong lan toi duoc - jlink stage se fail
+# ro rang luc runtime (thieu module) neu doan sai, luc do them thu cong vao EXTRA_MODULES ben duoi.
+FROM build AS jlink
+RUN jdeps \
+        --print-module-deps \
+        --ignore-missing-deps \
+        --multi-release 17 \
+        --recursive \
+        runner/build/install/runner/lib/*.jar > /tmp/modules.txt \
+    && EXTRA_MODULES="java.naming,java.management,java.sql,jdk.unsupported,jdk.crypto.ec,jdk.crypto.cryptoki" \
+    && jlink \
+        --add-modules "$(cat /tmp/modules.txt),${EXTRA_MODULES}" \
+        --strip-debug \
+        --no-header-files \
+        --no-man-pages \
+        --compress=2 \
+        --output /opt/jre
 
+# Runtime khong con can JDK/JRE day du - debian-slim (glibc, co /bin/sh cho script khoi dong cua
+# Gradle application plugin) + custom JRE tu jlink o tren la du, giam dang ke size/attack surface so
+# voi eclipse-temurin:17-jre truoc day.
+FROM debian:12-slim AS runtime
+ENV JAVA_HOME=/opt/jre
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
+COPY --from=jlink /opt/jre /opt/jre
+
+WORKDIR /app
 COPY --from=build /workspace/runner/build/install/runner ./
 
 # KHONG bake ENV default nao o day (tung co BOOTSTRAP_SERVERS=broker:29092 va 4 dong COUCHBASE_* -
