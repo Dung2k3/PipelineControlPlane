@@ -13,20 +13,11 @@ application {
 
 dependencies {
     implementation project(':common')
-
-    // PipelineTopologyBuilder.build() tra ve Topology - du gia tri bi bo qua, javac van can class
-    // file Topology tren compile classpath de resolve chu ky method (khong lo ra qua project(':common')
-    // vi 'implementation' cua common khong lo ra compile classpath cua module goi no).
     implementation "org.apache.kafka:kafka-streams:${kafkaVersion}"
-
-    // Goi Kubernetes API de tao/restart/xoa Deployment cho 1 pipeline. Chi module nay can -
-    // common/runner khong dung k8s client, giu image cua chung nhe hon.
     implementation "io.fabric8:kubernetes-client:${fabric8Version}"
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    // Mock server that fakes the k8s API server over HTTP (@EnableKubernetesMockClient) - test
-    // PipelineDeploymentManager that su, khong can minikube/cluster song luc chay test.
     testImplementation "io.fabric8:kubernetes-server-mock:${fabric8Version}"
 }
 

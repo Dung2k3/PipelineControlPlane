@@ -10,10 +10,6 @@ ext {
 }
 
 dependencies {
-    // Engine (config/node/validation/topology/expression/serdes) + doc config Couchbase dung chung
-    // cho ca api va runner. Khong ai o day duoc lo ra qua chu ky public method ma api/runner goi
-    // truc tiep, nen khai implementation la du (api/runner van thay duoc luc runtime qua project
-    // dependency, chi khong thay luc compile - dung y).
     implementation "org.apache.kafka:kafka-streams:${kafkaVersion}"
     implementation "org.apache.kafka:kafka-clients:${kafkaVersion}"
     implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"

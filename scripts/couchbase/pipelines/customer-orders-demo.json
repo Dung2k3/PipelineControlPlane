@@ -1,7 +1,7 @@
 {
-  "pipelineId": "customer-orders-demo-local",
-  "bootstrapServers": "broker:9092",
-  "applicationId": "customer-orders-demo-app-local",
+  "pipelineId": "customer-orders-demo",
+  "bootstrapServers": "broker:29092",
+  "applicationId": "customer-orders-demo-app",
   "nodes": [
     {
       "id": "srcLeft",

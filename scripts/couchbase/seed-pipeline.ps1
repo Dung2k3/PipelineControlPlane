@@ -7,7 +7,7 @@
 # Yeu cau: scripts/couchbase/init-cluster.ps1 da chay xong (co bucket "streamflow" +
 # primary index).
 param(
-    [string]$PipelineId = "customer-orders-demo-local"
+    [string]$PipelineId = "customer-orders-demo"
 )
 
 $ErrorActionPreference = "Stop"

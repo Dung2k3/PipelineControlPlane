@@ -69,6 +69,15 @@ spec:
               value: "password"
             - name: COUCHBASE_BUCKET
               value: "streamflow"
+            # Dung de template hoa pipeline-deployment.template.yaml (PipelineDeploymentManager.create).
+            # couchbase/broker o day la container Docker ngoai cluster (xem docker-compose.yml o root
+            # repo), KHONG phai Service trong k8s. minikube phai duoc
+            # `docker network connect pipelinecontrolplane_default minikube` truoc thi Pod moi
+            # resolve duoc 2 ten nay.
+            - name: PIPELINE_COUCHBASE_CONNECTION_STRING
+              value: "couchbase://couchbase"
+            - name: PIPELINE_IMAGE
+              value: "streamflow/pipeline-control-plane:1.0"
             - name: K8S_NAMESPACE
               valueFrom:
                 fieldRef:
